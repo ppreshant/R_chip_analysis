@@ -1,4 +1,4 @@
-# reads an array and makes file of intensities - can apply threshold
+# reads an array and makes file of intensities - can't apply threshold
 # set unik = 1 to avg two spots side by side
 
 all_hits <- function(file_name)

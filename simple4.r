@@ -1,12 +1,12 @@
 # applicable for dual scan two wavelength(s) file (Pilot 4,5)
-# reads an array and makes file of intensities - can apply threshold
+# reads an array and makes file of intensities - can't apply threshold
 # set unik = 1 to avg two spots side by side
 # pTYR = wavelength 532 => Cy3 
 
 all_hits4 <- function(file_name)
 {  # finding classes of each column to make it easier for reading the full table
    
-  unik = 0 # should i merge unique entries?
+  unik = 1 # should i merge unique entries?
   badspo = 0 # should I remove bad spots - high background critireon (1000) and ratio < 3?
   
   a <- read.table('results/pilot4/C_pilot4_9049232.gpr',skip= 31, header = TRUE,nrows = 4)
