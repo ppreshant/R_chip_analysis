@@ -46,7 +46,7 @@ hit <- function(file_name)
     # filtering the rows/ spots
     t <- s[[4]] > thr  #mean(s[[7]]) + 1 * sd(s[[7]])   # Hit criterea - Greater than 3 standard deviations
     # s <- s[t,]
-    s[!t,4] <- 0
+    s[!t,4] <- 0  # make all elements that do not pass threshold to 0 - problem: if only 1 spot is above thr, it will still exist.
   }
   
   if (unik == 1)

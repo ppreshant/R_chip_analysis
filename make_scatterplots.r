@@ -15,7 +15,7 @@
 
 make_checklist <- function(a)
 {
-  f <- cbind(all_hits(a), status = 'normal')
+  f <- cbind(all_hitsR(a), status = 'normal')
   if (grepl('F_*',a)) 
   {
 #     f <- check_list(F_PPI_string,f,'PPI')
@@ -43,8 +43,8 @@ make_sctr <- function(k,c, Fl)
   # kin <- readline(prompt = 'which Kinase is this?')
   fa <- Fl[[k]][order(Fl[[k]]$status),]
   ca <- Fl[[c]][order(Fl[[k]]$status),]
-  dat <- data.frame(Name = fa$Name, Jak2.Intensity = fa$`F/B n`, Control.Intensity = ca$`F/B n`, status = fa$status, Ratio = fa$`F/B n`/ca$`F/B n` , stringsAsFactors = FALSE)
-  s <- ggplot(data = dat, aes(Control.Intensity,Jak2.Intensity, color = status, alpha = .5)) + geom_point() + scale_color_manual(breaks = c("normal","PPI","PPI-expt", "known hit"), values=c("yellow","green",'blue', "black")) + geom_abline(intercept = 0, slope = 1) + geom_hline(yintercept = median(dat$Jak2.Intensity)) #+ xlim(0,10) + ylim(0,10)
+  dat <- data.frame(Name = fa$Name, Fgfr2.Intensity = fa$`F/B n`, Control.Intensity = ca$`F/B n`, status = fa$status, Ratio = fa$`F/B n`/ca$`F/B n` , stringsAsFactors = FALSE)
+  s <- ggplot(data = dat, aes(Control.Intensity,Fgfr2.Intensity, color = status, alpha = .5)) + geom_point() + scale_color_manual( values=c("yellow","green", "black")) + geom_abline(intercept = 0, slope = 1) + geom_hline(yintercept = median(dat$Fgfr2.Intensity)) #+ xlim(0,10) + ylim(0,10)
   print(s)
   dat
 }
@@ -54,10 +54,14 @@ make_sctr <- function(k,c, Fl)
 
 # some other plot
 ## ggplot(data = cc, aes(index, `F/B n`, color = scanner)) + geom_point() + coord_cartesian(ylim = c(0,2))
+# for replicates plot
+# s1 <- ggplot(data = ff, aes(Control.Intensity,Fgfr2.Intensity, color = status, alpha = .5)) + geom_point() + scale_color_manual( values=c("yellow","green", "black")) + geom_abline(intercept = 0, slope = 1) 
+# s1 + ggtitle('Comparision of replicates -Fgfr2 chips - significant spots') + xlab('Intensity - A') + ylab('Intensity - B')
+
 find_thr <- function(s,x)
 {
   # make dummy distribution of I <= 1
-  d <- s[5][s[[5]] <= 1, ]
+  d <- s[4][s[[4]] <= 1, ]
   d <- rbind (d, 2 - d ) # complete a mirror image of distribution
   thr <- mean(d) + x * sd(d)  # threshold mean + 6 sd of dummy distribution
   # # filtering the rows/ spots

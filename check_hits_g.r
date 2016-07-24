@@ -61,3 +61,34 @@ raw_F <- read.table(paste('input files/','raw_F.txt', sep = ''), header = FALSE)
    }
    fl 
  }
+ 
+all_merg <- function(lst = NULL)
+{
+  ou <- list(0)
+  for (i in 1:6)
+  {
+    a1 <- 2*i - 1
+    b1 <- 2*i
+    ou[[i]] <- duplmerg(a1,b1)
+  }
+  ou
+}  
+duplmerg <- function(a1,b1,lst = Fl)
+ { # inputs two duplicates with hits above threshold - this program merges the common hits
+   a <- lst[[a1]]
+   b <- lst[[b1]]
+   t <- a[a$index %in% b$index,c(1,2,7)]
+   af <- a[a$index %in% b$index,3:6] 
+   bf <- b[b$index %in% a$index,3:6] 
+   d <- cbind(t[1:2], (af+bf)/2, t[3] )
+   d[c(3,4,6)] <- round(d[c(3,4,6)])
+   d[5] <- round(d[5],2)
+   d
+}
+
+rmcntrl <- function(k1,c1,lst)
+{ # for removing positive hits in control chip from the kinase chip
+  k <- lst[[k1]]
+  c <- lst[[c1]]
+  ot <- k[!k$index %in% c$index,]
+}
