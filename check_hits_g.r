@@ -62,14 +62,15 @@ raw_F <- read.table(paste('input files/','raw_F.txt', sep = ''), header = FALSE)
    fl 
  }
  
-all_merg <- function(lst = NULL)
-{
+all_merg <- function(lst = Fl)
+{ # merges all duplicates in the list 
   ou <- list(0)
-  for (i in 1:6)
+  k <- length(lst)/2
+  for (i in 1:k)
   {
     a1 <- 2*i - 1
     b1 <- 2*i
-    ou[[i]] <- duplmerg(a1,b1)
+    ou[[i]] <- duplmerg(a1,b1,lst)
   }
   ou
 }  
@@ -85,10 +86,50 @@ duplmerg <- function(a1,b1,lst = Fl)
    d[5] <- round(d[5],2)
    d
 }
+all_rmcntrl <- function(lst = Fl1)
+{ # removes control spots from all 5 kinase spots in list
+  ou <- list(NULL)
+  k <- length(lst)
+  for (i in 2:k)
+  {
+    ou[[i]] <- rmcntrl(i,1,lst)
+  }
+  ou
+}
 
-rmcntrl <- function(k1,c1,lst)
+rmcntrl <- function(k1,c1,lst = Fl1)
 { # for removing positive hits in control chip from the kinase chip
   k <- lst[[k1]]
   c <- lst[[c1]]
   ot <- k[!k$index %in% c$index,]
 }
+                        # all spots,  # significant spots (control removed)
+add_wtspots <- function(lstf = Flf, lst = Flr2)
+{ # adds significant substrates of WT kinase (control spots removed) on all kinases and control
+  # K <- lst[[2]] # WT array list
+  Kid <- unique(unlist(mapply(function(x) x$index,lst)))
+  ou <- list(NULL)
+  for (i in 1:6)
+  {
+    ou[[i]] <- lstf[[i]] [lstf[[i]]$index %in% Kid , ] # |lstf[[i]]$index %in% lst[[i]] 
+    ou[[i]]$Control_Intensity <- lstf[[1]] [lstf[[1]]$index %in% ou[[i]]$index, 5]
+  }
+  ou
+}  
+
+add_flags <- function(lstf = Fl, lst = Fl2)
+{ # adds significant substrates of WT kinase (control spots removed) on all kinases and control
+  # K <- lst[[2]] # WT array list
+  # Kid <- unique(unlist(mapply(function(x) x$index,lst)))
+  ou <- lstf
+  k <- length(lstf)
+  for (i in 1:k)
+  {
+    ou[[i]]$flag <- 'normal'
+    ou[[i]]$flag[lstf[[i]]$index %in% lst[[2]]$index] <- 'WT hits'
+    ou[[i]]$flag[lstf[[i]]$index %in% lst[[1]]$index] <- 'control hits'
+    ou[[i]]$flag[lstf[[i]]$index %in% lst[[ceiling(i/2)]]$index] <- 'common'
+    # ou[[i]]$Control_Intensity <- lstf[[1]] [lstf[[1]]$index %in% ou[[i]]$index, 5]
+  }
+  ou
+} 

@@ -3,7 +3,7 @@
 # set unik = 1 to avg two spots - diagonal
 # pTYR = wavelength 22 => manually set number 
 # Caution: F/B has F/(B+1)
-all_hitsR <- function(file_name)
+hitsR <- function(file_name)
 {  # finding classes of each column to make it easier for reading the full table
   
   unik = 1 # should i merge unique entries?
@@ -41,7 +41,7 @@ all_hitsR <- function(file_name)
   #   block_med[i] <- median(st[[4]]) 
   #   s[4][tmp,] <- st[[4]] - block_med[i] + 1   # normalize : within chip norm. median Ij
   # }
-
+  
   if(thresholding != -1)
   {thr <- (s$`F/B n` >= find_thr(s,thresholding))   # thresholding - 3 sd above mean for dummy dist
   s[!thr,4] <- 0                                    # if spot < threshold, make it 0
@@ -50,7 +50,7 @@ all_hitsR <- function(file_name)
   if(deflag == 1)
   {
     sf <- b$Flags == -100
-    s[sf,4] <- 0
+    s[sf,4] <- s[sf,2] <- 0
   }
   
   if (unik == 1)
@@ -63,8 +63,8 @@ all_hitsR <- function(file_name)
     Name <- s[c(rep(T,32),rep(FALSE,32)), 1]            # names
     index <- (1:dim(s1)[1])
     # ss <- s[c(TRUE,FALSE),1:3]          # other const elements
-   
-     # filtering steps - remove Inf, flags, thresholding etc.
+    
+    # filtering steps - remove Inf, flags, thresholding etc.
     s1[(s1[3] == Inf),3] <- 1    # remove Inf
     s2[(s2[3] == Inf),3] <- 1
     
@@ -91,7 +91,7 @@ all_hitsR <- function(file_name)
     # filtering steps - remove Inf, flags, thresholding etc.
     # s1[(s1[3] == Inf),3] <- 1    # remove Inf
     # s2[(s2[3] == Inf),3] <- 1
-
+    
     tt <- (s[c(rep(T,32),rep(FALSE,32)),3] == 0) | (s[c(rep(FALSE,32),rep(T,32)),3] == 0)  # If one spot is < threshold (it will be 0), make the other one also o
     s[tt,3] <- s[tt,3] <- 0
     
