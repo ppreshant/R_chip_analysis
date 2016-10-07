@@ -1,6 +1,6 @@
  # Many random functions here
  # gives all hits in the list from phosphonetworks with their data 
-check <- function(x,a)
+check <- function(x,a) # a = array, x = 
 {  
   t <- x == as.character(a[['Name']])  # check the names
   #a[t,]
@@ -43,8 +43,8 @@ raw_F <- read.table(paste('input files/','raw_F.txt', sep = ''), header = FALSE)
 #  
 
  # checks a list and flags the spot with same names as variable 'ms' under status column 
- #  tst <- array file handle
- #  fl  <- data frame of the array
+ #  tst <- list of Names to be checked
+ #  fl  <- data frame of the Array
  #  ms  <- name of the flag
  check_list <- function(tst,fl, ms)
  {
@@ -132,4 +132,52 @@ add_flags <- function(lstf = Fl, lst = Fl2)
     # ou[[i]]$Control_Intensity <- lstf[[1]] [lstf[[1]]$index %in% ou[[i]]$index, 5]
   }
   ou
+} 
+
+all_min4 <- function(lst = Fl)
+{ # merges all duplicates in the list 
+  ou <- list(0)
+  k <- length(lst)/2
+  for (i in 1:k)
+  {
+    a1 <- 2*i - 1
+    b1 <- 2*i
+    ou[[i]] <- duplmin4(a1,b1,lst)
+  }
+  ou
+}  
+duplmin4 <- function(a1,b1,lst = Fl)
+{ # inputs two duplicate chips full files - this program gives min of the common hits
+  a <- lst[[a1]]
+  b <- lst[[b1]]
+  
+  d <- cbind(a[1:2], pmin(a[3:6],b[3:6]), a[7])
+  d[c(3,4,6)] <- round(d[c(3,4,6)])
+  d[5] <- round(d[5],2)
+  d
+}
+
+graphitall <- function(lst = Fl2, what = 'J')
+{ e <- strsplit(strsplit(folo,'/')[[1]][7],'')[[1]][3]   # finds the number of days exposure from input file location
+  n <- length(lst)
+  if(what == 'J')  naam <- c('Control', 'WT.Jak2', 'Jak2.V617F', 'Jak2.R683G', 'Jak2.R683S', 'Jak2.K539L')   # naam <- c('Control', 'Jak2', 'J1', 'J2', 'J3', 'J4')
+  if(what == 'F')  naam <- c('Control', 'WT.Fgfr2', 'Fgfr2.S252W', 'Fgfr2.N549K', 'Fgfr2.C382R', 'Fgfr2.Y375C') # naam <- c('Control', 'Fgfr2', 'F1', 'F2', 'F3', 'F4')
+  c = 2
+  cf <- paste(naam[c],'.(Foreground)',sep = '')
+  for (k in 3:n)
+  {  
+    fa <- lst[[k]][order(lst[[k]]$status),]
+    ca <- lst[[c]][order(lst[[k]]$status),]
+    # dat <- data.frame(Name = fa$Name, Fgfr2.Intensity = fa$`F/B n`, Control.Intensity = ca$`F/B n`, status = fa$status, Ratio = fa$`F/B n`/ca$`F/B n` , stringsAsFactors = FALSE)
+    kf <- paste(naam[k],'.(Foreground)',sep = '')
+    dat <- setNames(data.frame(fa$Name, fa$F22.Median, ca$F22.Median, fa$status, fa$`F/B n`/ca$`F/B n`, stringsAsFactors = FALSE), c('Name', kf, cf, 'status', 'Ratio'))
+    s <- ggplot(data = dat, aes_string(cf, kf, color = 'status', alpha = .5)) + geom_point() + scale_color_manual( values=c("grey","green", "black")) + geom_abline(intercept = 0, slope = 1) + geom_hline(yintercept = median(dat[[kf]]))+ geom_vline(xintercept = median(dat[[cf]])) + ggtitle(paste(naam[k],'vs',naam[c],'- (Foreground)')) #+ ylab('') + xlab('')  #+ xlim(0,10) + ylim(0,10) # , e,  'days exposure'
+    # print(s)
+    ggsave(paste(oufl,naam[k],' vs ',naam[c],'.jpeg', sep = ''))
+
+  }
+  
+  sctr(2,1,lst,what)
+  sctr(2,1,Fl,'rep','Control')
+  sctr(4,3,Fl,'rep',naam[[2]])
 } 

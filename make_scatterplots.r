@@ -14,8 +14,9 @@
 # qplot(c[[5]],f1[[5]], xlim = c(0,5), ylim = c(0,5), colour = as.factor(f1$check)) + scale_color_manual(breaks = c("0", "1"), values=c("grey", "black")) + ggtitle ('Pilot3 Comparision') + xlab('control') + ylab('Kinase')
 
 make_checklist <- function(a)
-{
-  f <- cbind(all_hitsR(a), status = 'normal')
+{ # change hitsR to function to read arrays for pilot 4,5..
+  # f <- cbind(all_hitsR(a), status = 'normal')
+  f <- cbind(hitsR(a), status = 'normal')
   if (grepl('F_*',a)) 
   {
 #     f <- check_list(F_PPI_string,f,'PPI')
@@ -45,10 +46,38 @@ make_sctr <- function(k,c, Fl)
   ca <- Fl[[c]][order(Fl[[k]]$status),]
   # dat <- data.frame(Name = fa$Name, Fgfr2.Intensity = fa$`F/B n`, Control.Intensity = ca$`F/B n`, status = fa$status, Ratio = fa$`F/B n`/ca$`F/B n` , stringsAsFactors = FALSE)
   dat <- data.frame(Name = fa$Name, Fgfr2.Foreground = fa$F22.Median, Control.Foreground = ca$F22.Median, status = fa$status, Ratio = fa$`F/B n`/ca$`F/B n` , stringsAsFactors = FALSE)
-  s <- ggplot(data = dat, aes(Control.Foreground,Fgfr2.Foreground, color = status, alpha = .5)) + geom_point() + scale_color_manual( values=c("grey","green", "black")) + geom_abline(intercept = 0, slope = 1) + geom_hline(yintercept = median(dat$Fgfr2.Foreground)) #+ ylab('') + xlab('') + ggtitle('') #+ xlim(0,10) + ylim(0,10)
+  s <- ggplot(data = dat, aes(Control.Foreground ,Fgfr2.Foreground, color = status, alpha = .5)) + geom_point() + scale_color_manual( values=c("grey","green", "black")) + geom_abline(intercept = 0, slope = 1) + geom_hline(yintercept = median(dat$Fgfr2.Foreground))+ geom_vline(xintercept = median(dat$Control.Foreground)) #+ ylab('') + xlab('') + ggtitle('') #+ xlim(0,10) + ylim(0,10)
   print(s)
-  dat
+  list(dat,s)
 }
+
+sctr <- function(k,c, lst = Fl, what = 'rep', l = 'Fgfr2')
+{ # takes 2 numbers for kinase, control and Fl of the make_checklist lapplied
+  # what = 'F' or 'J' or 'rep' for fgfr2 data, jak2 data,  or to make repeats
+  # for repeats l could be 'Fgfr2', 'Jak2' or 'Control'
+  # gives foreground values - change if you like!
+  n <- length(lst)
+#   if(what == 'J')  naam <- c('Control', 'WT.Jak2', 'Jak2.V617F', 'Jak2.R683G', 'Jak2.R683S', 'Jak2.K539L')   
+#   if(what == 'F')  naam <- c('Control', 'WT.Fgfr2', 'Fgfr2.S252W', 'Fgfr2.N549K', 'Fgfr2.C382R', 'Fgfr2.Y375C') 
+  if(what == 'J')  naam <- c('Control', 'Jak2', 'J1', 'J2', 'J3', 'J4')   
+  if(what == 'F')  naam <- c('Control', 'Fgfr2', 'F1', 'F2', 'F3', 'F4')
+  if(what == 'rep')  naam <- c('Chip.A', 'Chip.B','Chip.A', 'Chip.B')
+  cf <- paste(naam[c],'.Foreground',sep = '')
+  kf <- paste(naam[k],'.Foreground',sep = '')
+  fa <- lst[[k]][order(lst[[k]]$status),]
+  ca <- lst[[c]][order(lst[[k]]$status),]
+  # dat <- data.frame(Name = fa$Name, Fgfr2.Intensity = fa$`F/B n`, Control.Intensity = ca$`F/B n`, status = fa$status, Ratio = fa$`F/B n`/ca$`F/B n` , stringsAsFactors = FALSE)
+  
+  dat <- setNames(data.frame(fa$Name, fa[[3]], ca[[3]], fa$status, fa$`F/B n`/ca$`F/B n`, stringsAsFactors = FALSE), c('Name', kf, cf, 'status', 'Ratio')) # fa$F22.Median
+  s <- ggplot(data = dat, aes_string(cf, kf, color = 'status', alpha = .5)) + geom_point() + scale_color_manual( values=c("grey","green", "black")) + geom_abline(intercept = 0, slope = 1) + geom_hline(yintercept = median(dat[[kf]]))+ geom_vline(xintercept = median(dat[[cf]]))  #+ ylab('') + xlab('')  #+ xlim(0,10) + ylim(0,10)
+  if (what != 'rep') s <- s + ggtitle(paste(naam[k],'vs',naam[c],'- Foreground'))
+  else s <- s + ggtitle(paste(l,'replicates' ,'- Foreground')) 
+  # print(s)
+  if (what != 'rep')  ggsave(paste(oufl,naam[k],' vs ',naam[c],'.jpeg', sep = ''))
+  else ggsave(paste(oufl,l,' replicates ', '.jpeg', sep = ''))
+#   
+  list(dat,s)
+} 
 
 # f <- Fl[[4]][order(Fl[[4]]$status),]
 # c <- Fl[[1]][order(Fl[[4]]$status),]
